@@ -1,0 +1,32 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { fetchPublishedArticles } from "@/lib/supabase";
+
+let articles: Awaited<ReturnType<typeof fetchPublishedArticles>> = [];
+let listError: string | null = null;
+try {
+  articles = await fetchPublishedArticles();
+} catch (e) {
+  listError = e instanceof Error ? e.message : String(e);
+}
+---
+<BaseLayout title="記事一覧">
+  <h1>記事一覧</h1>
+  <p><a href="/">トップ</a></p>
+  {
+    listError ? (
+      <p role="alert">{listError}</p>
+    ) : articles.length === 0 ? (
+      <p>公開中の記事はありません。</p>
+    ) : (
+      <ul>
+        {articles.map((a) => (
+          <li>
+            <a href={`/articles/${a.slug}`}>{a.title}</a>
+            <span> — {a.category}</span>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</BaseLayout>
